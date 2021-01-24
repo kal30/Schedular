@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -15,6 +15,7 @@ import {
   Text,
   StatusBar,
   TouchableOpacity,
+  Button,
 } from 'react-native';
 
 import {
@@ -26,6 +27,9 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import PushNotification from 'react-native-push-notification';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+
+import Schedule from './component/Schedule';
 
 // Must be outside of any component LifeCycle (such as `componentDidMount`).
 PushNotification.configure({
@@ -47,16 +51,66 @@ PushNotification.configure({
 const App: () => React$Node = () => {
   function testPush() {
     console.log(new Date() + 'invoking function testPush');
+    const dateAssigned = scheduledDateTime(15, 25);
+    console.log(dateAssigned);
     PushNotification.localNotificationSchedule({
       channelId: 'fooChannel', // (required) channelId, if the channel doesn't exist, it will be created with options passed above (importance, vibration, sound). Once the channel is created, the channel will not be update. Make sure your channelId is different if you change these options. If you have created a custom channel, it will apply options of the channel.
       message: 'My Notification Message', // (required)
       userInfo: {foo: 'bar', when: new Date()},
-      date: new Date(Date.now() + 60 * 1000), // in 60 secs
+      date: dateAssigned,
+      repeatType: 'day',
     });
+  }
+
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+
+  const showDatePicker = () => {
+    console.log('This is clicked');
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    console.warn('A date has been picked: ', date);
+    hideDatePicker();
+  };
+
+  function listThings(things) {
+    things.forEach((thing) => {
+      console.log(thing.id);
+      console.log(thing.date);
+    });
+  }
+
+  function openClock() {
+    return <Schedule />;
+  }
+
+  function listAllScheduledNotifications() {
+    PushNotification.getScheduledLocalNotifications(listThings);
   }
 
   function testCancel() {
     PushNotification.cancelAllLocalNotifications();
+  }
+
+  function scheduledDateTime(hour, minute) {
+    const now = new Date();
+    const schTimeToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      hour,
+      minute,
+    );
+    const thirtySeconds = 30 * 1000;
+    const thirtySecondsFromNow = new Date(now.getTime() + 30 * 1000);
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    const schTimeTomorrow = new Date(schTimeToday.getTime() + twentyFourHours);
+    return schTimeToday > thirtySecondsFromNow ? schTimeToday : schTimeTomorrow;
   }
 
   return (
@@ -83,6 +137,27 @@ const App: () => React$Node = () => {
             <TouchableOpacity style={styles.buttonLook} onPress={testPush}>
               <Text style={styles.sectionTitle}>Push</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.buttonLook}
+              onPress={listAllScheduledNotifications}>
+              <Text style={styles.sectionTitle}>List All Notifications</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              title="Show Date Picker"
+              style={styles.buttonLook}
+              onPress={showDatePicker}>
+              <Text style={styles.sectionTitle}>Show Date Picker</Text>
+            </TouchableOpacity>
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="time"
+              onConfirm={handleConfirm}
+              onCancel={hideDatePicker}
+              locale="en_GB"
+              is24Hour={true}
+              headerTextIOS="Pick a time"
+              isDarkModeEnabled={false}
+            />
             <TouchableOpacity style={styles.buttonLook} onPress={testCancel}>
               <Text style={styles.sectionTitle}>Cancel</Text>
             </TouchableOpacity>
