@@ -45,17 +45,18 @@ PushNotification.configure({
 });
 
 const App: () => React$Node = () => {
-  function testCancel() {
-    PushNotification.cancelAllLocalNotifications();
-  }
-
   function testPush() {
     console.log(new Date() + 'invoking function testPush');
-    PushNotification.localNotification({
+    PushNotification.localNotificationSchedule({
       channelId: 'fooChannel', // (required) channelId, if the channel doesn't exist, it will be created with options passed above (importance, vibration, sound). Once the channel is created, the channel will not be update. Make sure your channelId is different if you change these options. If you have created a custom channel, it will apply options of the channel.
       message: 'My Notification Message', // (required)
       userInfo: {foo: 'bar', when: new Date()},
+      date: new Date(Date.now() + 60 * 1000), // in 60 secs
     });
+  }
+
+  function testCancel() {
+    PushNotification.cancelAllLocalNotifications();
   }
 
   return (
