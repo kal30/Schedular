@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -46,6 +46,11 @@ PushNotification.configure({
 });
 
 const App: () => React$Node = () => {
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [notificationTimePicked, setNotificationTimePicked] = useState(
+    new Date(),
+  );
+
   function testCancel() {
     console.log(new Date() + 'invoking function testCancel');
     PushNotification.cancelAllLocalNotifications();
@@ -53,7 +58,11 @@ const App: () => React$Node = () => {
 
   function testPush() {
     console.log(new Date() + 'invoking function testPush');
-    const dateAssigned = scheduledDateTime(8, 20);
+    console.log(notificationTimePicked + ' This is notification Time Picked');
+    const dateAssigned = scheduledDateTime(
+      notificationTimePicked.getHours(),
+      notificationTimePicked.getMinutes(),
+    );
     console.log(dateAssigned);
     PushNotification.localNotificationSchedule({
       channelId: 'fooChannel', // (required) channelId, if the channel doesn't exist, it will be created with options passed above (importance, vibration, sound). Once the channel is created, the channel will not be update. Make sure your channelId is different if you change these options. If you have created a custom channel, it will apply options of the channel.
@@ -91,6 +100,23 @@ const App: () => React$Node = () => {
     PushNotification.getScheduledLocalNotifications(listThings);
   }
 
+  const showDatePicker = () => {
+    console.log('This is clicked');
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    console.log('A date has been picked: ', date);
+    console.log('Hours is ', date.getHours());
+    console.log('Minutes is ', date.getMinutes());
+    hideDatePicker();
+    setNotificationTimePicked(date);
+  };
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -120,6 +146,22 @@ const App: () => React$Node = () => {
               onPress={listAllScheduledNotifications}>
               <Text style={styles.sectionTitle}>List all Notification</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              title="Show Date Picker"
+              style={styles.buttonLook}
+              onPress={showDatePicker}>
+              <Text style={styles.sectionTitle}>Show Date Picker</Text>
+            </TouchableOpacity>
+            <DateTimePickerModal
+              isVisible={isDatePickerVisible}
+              mode="time"
+              onConfirm={handleConfirm}
+              onCancel={hideDatePicker}
+              locale="en_GB"
+              is24Hour={true}
+              headerTextIOS="Pick a time"
+              isDarkModeEnabled={false}
+            />
             <TouchableOpacity style={styles.buttonLook} onPress={testCancel}>
               <Text style={styles.sectionTitle}>Cancel</Text>
             </TouchableOpacity>
