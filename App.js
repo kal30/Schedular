@@ -27,6 +27,7 @@ import {
 
 import PushNotification from 'react-native-push-notification';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import ListOfNotifications from './component/ListOfNotifications';
 
 // Must be outside of any component LifeCycle (such as `componentDidMount`).
 PushNotification.configure({
@@ -59,6 +60,8 @@ const App: () => React$Node = () => {
   function testPush() {
     console.log(new Date() + 'invoking function testPush');
     console.log(notificationTimePicked + ' This is notification Time Picked');
+    console.log('Hours ', notificationTimePicked.getHours());
+    console.log('Min ', notificationTimePicked.getMinutes());
     const dateAssigned = scheduledDateTime(
       notificationTimePicked.getHours(),
       notificationTimePicked.getMinutes(),
@@ -121,52 +124,37 @@ const App: () => React$Node = () => {
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <TouchableOpacity style={styles.buttonLook} onPress={testPush}>
-              <Text style={styles.sectionTitle}>Push</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+        <View style={styles.body}>
+          <TouchableOpacity style={styles.buttonLook} onPress={testPush}>
+            <Text style={styles.sectionTitle}>Push</Text>
+          </TouchableOpacity>
+          {/* <TouchableOpacity
               style={styles.buttonLook}
               onPress={listAllScheduledNotifications}>
               <Text style={styles.sectionTitle}>List all Notification</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              title="Show Date Picker"
-              style={styles.buttonLook}
-              onPress={showDatePicker}>
-              <Text style={styles.sectionTitle}>Show Date Picker</Text>
-            </TouchableOpacity>
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="time"
-              onConfirm={handleConfirm}
-              onCancel={hideDatePicker}
-              locale="en_GB"
-              is24Hour={true}
-              headerTextIOS="Pick a time"
-              isDarkModeEnabled={false}
-            />
-            <TouchableOpacity style={styles.buttonLook} onPress={testCancel}>
-              <Text style={styles.sectionTitle}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+            </TouchableOpacity> */}
+          <TouchableOpacity
+            title="Show Date Picker"
+            style={styles.buttonLook}
+            onPress={showDatePicker}>
+            <Text style={styles.sectionTitle}>Show Date Picker</Text>
+          </TouchableOpacity>
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode="time"
+            onConfirm={handleConfirm}
+            onCancel={hideDatePicker}
+            locale="en_GB"
+            is24Hour={true}
+            headerTextIOS="Pick a time"
+            isDarkModeEnabled={false}
+          />
+          <TouchableOpacity style={styles.buttonLook} onPress={testCancel}>
+            <Text style={styles.sectionTitle}>Cancel</Text>
+          </TouchableOpacity>
+
+          <ListOfNotifications />
+        </View>
       </SafeAreaView>
     </>
   );
