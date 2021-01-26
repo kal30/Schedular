@@ -70,12 +70,47 @@ const App: () => React$Node = () => {
     PushNotification.localNotificationSchedule({
       channelId: 'fooChannel', // (required) channelId, if the channel doesn't exist, it will be created with options passed above (importance, vibration, sound). Once the channel is created, the channel will not be update. Make sure your channelId is different if you change these options. If you have created a custom channel, it will apply options of the channel.
       message: 'My Notification Message', // (required)
-      userInfo: {foo: 'bar', when: new Date()},
+      userInfo: {
+        hours: notificationTimePicked.getHours(),
+        when: notificationTimePicked,
+        category: 'Mood',
+      },
       date: dateAssigned,
       repeatType: 'day',
     });
   }
 
+  function testLocalAtOnce() {
+    console.log('Entered local notificaiton');
+    if (!PushNotification.channelExists('fooChannel')) {
+      PushNotification.createChannel(
+        {
+          channelId: 'fooChannel', // (required)
+          channelName: 'My channel', // (required)
+          channelDescription: 'A channel to categorise your notifications', // (optional) default: undefined.
+          playSound: true, // (optional) default: true
+          soundName: 'default', // (optional) See `soundName` parameter of `localNotification` function
+          importance: 4, // (optional) default: 4. Int value of the Android notification importance
+          vibrate: true, // (optional) default: true. Creates the default vibration patten if true.
+        },
+        (created) => console.log(`createChannel returned '${created}'`), // (optional) callback returns whether the channel was created, false means it already existed.
+      );
+    }
+    PushNotification.getChannels(function (channel_ids) {
+      console.log(channel_ids);
+    });
+    PushNotification.localNotification({
+      channelId: 'fooChannel', // (required) channelId, if the channel doesn't exist, it will be created with options passed above (importance, vibration, sound). Once the channel is created, the channel will not be update. Make sure your channelId is different if you change these options. If you have created a custom channel, it will apply options of the channel.
+      message: 'My Notification Message', // (required)
+      userInfo: {
+        hours: notificationTimePicked.getHours(),
+        when: notificationTimePicked,
+        category: 'Mood',
+      },
+      // date: dateAssigned,
+      // repeatType: 'day',
+    });
+  }
   function scheduledDateTime(hour, minute) {
     const now = new Date();
     const schTimeToday = new Date(
@@ -92,16 +127,16 @@ const App: () => React$Node = () => {
     return schTimeToday > thirtySecondsFromNow ? schTimeToday : schTimeTomorrow;
   }
 
-  function listThings(things) {
-    things.forEach((thing) => {
-      console.log(thing.id);
-      console.log(thing.date);
-    });
-  }
+  // function listThings(things) {
+  //   things.forEach((thing) => {
+  //     console.log(thing.id);
+  //     console.log(thing.date);
+  //   });
+  // }
 
-  function listAllScheduledNotifications() {
-    PushNotification.getScheduledLocalNotifications(listThings);
-  }
+  // function listAllScheduledNotifications() {
+  //   PushNotification.getScheduledLocalNotifications(listThings);
+  // }
 
   const showDatePicker = () => {
     console.log('This is clicked');
@@ -122,22 +157,16 @@ const App: () => React$Node = () => {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" />
       <SafeAreaView>
-        <View style={styles.body}>
-          <TouchableOpacity style={styles.buttonLook} onPress={testPush}>
-            <Text style={styles.sectionTitle}>Push</Text>
+        <View style={styles.containerInRowTwo}>
+          <TouchableOpacity style={styles.button} onPress={testPush}>
+            <Text style={styles.sectionTitle}>Schedule</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
-              style={styles.buttonLook}
-              onPress={listAllScheduledNotifications}>
-              <Text style={styles.sectionTitle}>List all Notification</Text>
-            </TouchableOpacity> */}
           <TouchableOpacity
             title="Show Date Picker"
-            style={styles.buttonLook}
+            style={styles.button}
             onPress={showDatePicker}>
-            <Text style={styles.sectionTitle}>Show Date Picker</Text>
+            <Text style={styles.sectionTitle}>Show date picker</Text>
           </TouchableOpacity>
           <DateTimePickerModal
             isVisible={isDatePickerVisible}
@@ -149,64 +178,64 @@ const App: () => React$Node = () => {
             headerTextIOS="Pick a time"
             isDarkModeEnabled={false}
           />
-          <TouchableOpacity style={styles.buttonLook} onPress={testCancel}>
+        </View>
+
+        <View style={styles.containerInRowTwo}>
+          <TouchableOpacity style={styles.button} onPress={testLocalAtOnce}>
+            <Text style={styles.sectionTitle}>Notify me at once</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={testCancel}>
             <Text style={styles.sectionTitle}>Cancel</Text>
           </TouchableOpacity>
-
-          <ListOfNotifications />
         </View>
+
+        <ListOfNotifications />
       </SafeAreaView>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
+    fontSize: 15,
+    color: 'blue',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
+
+  containerInRowTwo: {
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    paddingTop: 5,
+    paddingRight: 5,
+    paddingBottom: 15,
   },
-  highlight: {
-    fontWeight: '700',
+
+  button: {
+    shadowColor: 'rgba(0,0,0, .4)', // IOS
+    shadowOffset: {height: 1, width: 1}, // IOS
+    shadowOpacity: 1, // IOS
+    shadowRadius: 1, //IOS
+    backgroundColor: '#fff',
+    elevation: 2, // Android
+    height: 50,
+    width: 150,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#fff',
   },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
+
   buttonLook: {
     marginRight: 5,
     marginLeft: 5,
     marginTop: 10,
     paddingTop: 20,
     paddingBottom: 20,
-    borderRadius: 2,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#fff',
-    flexDirection: 'row',
+    // flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'orange',
